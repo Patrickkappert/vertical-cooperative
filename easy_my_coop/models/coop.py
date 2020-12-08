@@ -5,7 +5,6 @@
 from datetime import datetime
 
 # pylint: disable=missing-manifest-dependency
-from addons.base_iban.models.res_partner_bank import validate_iban
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
@@ -20,8 +19,6 @@ _REQUIRED = [
     "ordered_parts",
     "zip_code",
     "city",
-    "iban",
-    "gender",
 ]
 
 
@@ -116,24 +113,7 @@ class SubscriptionRequest(models.Model):
             return False
         return True
 
-    def check_iban(self, iban):
-        try:
-            if iban:
-                validate_iban(iban)
-                return True
-            else:
-                return False
-        except ValidationError:
-            return False
-
-    @api.multi
-    @api.depends("iban", "skip_control_ng")
-    def _compute_validated_lines(self):
-        for sub_request in self:
-            validated = sub_request.skip_control_ng or self.check_iban(
-                sub_request.iban
-            )
-            sub_request.validated = validated
+   
 
     @api.multi
     @api.depends(
@@ -290,15 +270,7 @@ class SubscriptionRequest(models.Model):
         string="Valid Subscription request?",
         readonly=True,
     )
-    skip_control_ng = fields.Boolean(
-        string="Skip control",
-        help="if this field is checked then no"
-        " control will be done on the national"
-        " register number and on the iban bank"
-        " account. To be done in case of the id"
-        " card is from abroad or in case of"
-        " a passport",
-    )
+   
     lang = fields.Selection(
         _lang_get,
         string="Language",
@@ -443,7 +415,6 @@ class SubscriptionRequest(models.Model):
         self.lastname = partner.lastname
         self.email = partner.email
         self.birthdate = partner.birthdate_date
-        self.gender = partner.gender
         self.address = partner.street
         self.city = partner.city
         self.zip_code = partner.zip
@@ -457,8 +428,7 @@ class SubscriptionRequest(models.Model):
         if partner:
             self.is_company = partner.is_company
             self.already_cooperator = partner.member
-            if partner.bank_ids:
-                self.iban = partner.bank_ids[0].acc_number
+          
             if partner.member:
                 self.type = "increase"
             if partner.is_company:
@@ -591,7 +561,6 @@ class SubscriptionRequest(models.Model):
             "street": self.address,
             "zip": self.zip_code,
             "email": self.email,
-            "gender": self.gender,
             "cooperator": True,
             "city": self.city,
             "phone": self.phone,
