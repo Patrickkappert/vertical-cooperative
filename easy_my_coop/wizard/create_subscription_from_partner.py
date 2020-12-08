@@ -70,12 +70,7 @@ class PartnerCreateSubscription(models.TransientModel):
         if partner.is_company:
             return partner.company_register_number
 
-    @api.model
-    def _get_bank_account(self):
-        partner = self._get_partner()
-        if len(partner.bank_ids) > 0:
-            return partner.bank_ids[0].acc_number
-        return None
+   
 
     @api.model
     def _get_possible_share(self):
@@ -204,12 +199,7 @@ class PartnerCreateSubscription(models.TransientModel):
                     }
                     partner_obj.create(represent_vals)
 
-        if not self._get_bank_account():
-            partner_bank = self.env["res.partner.bank"]
-            partner_bank.create(
-                {"partner_id": cooperator.id, "acc_number": self.bank_account}
-            )
-        vals["iban"] = self.bank_account
+        
         if self.is_company:
             representative = self._get_representative()
             vals["name"] = representative.name
