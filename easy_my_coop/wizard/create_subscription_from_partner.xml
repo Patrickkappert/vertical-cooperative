@@ -20,7 +20,6 @@
                         <field name="email"/>
                         <field name="register_number"
                                attrs="{'invisible':[('is_company','=',False)],'required':[('is_company','=',True)]}"/>
-                        <field name="bank_account"/>
                         <field name="share_product" widget="selection"/>
                         <field name="share_qty"/>
                         <field name="share_unit_price"/>
